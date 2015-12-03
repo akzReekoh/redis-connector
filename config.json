@@ -1,0 +1,38 @@
+/* The config.json file is where you specify additional configuration needed by
+ * your plugin. The details you specify here will be translated to a form on the
+ * UI. The values supplied by the users will then get injected as options on the
+ * platform on ready event.
+ */
+{
+  "host": {
+	"label": "Host",
+	"type": "String",
+	"required": true,
+	"help": "Redis host server."
+  },
+  "port": {
+	"label": "Port",
+	"type": "Number",
+	"required": true,
+	"help": "Redis port of the host server."
+  },
+  "user": {
+	"label": "User",
+	"type": "String",
+	"required": true,
+	"help": "Redis user account."
+  },
+  "pass": {
+	"label": "Pass",
+	"type": "String",
+	"required": true,
+	"help": "Redis password for user."
+  },
+  "publish_key": {
+	"label": "Channel",
+	"type": "String",
+	"required": true,
+	"help": "The channel where data will be published."
+  }
+
+}
