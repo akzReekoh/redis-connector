@@ -7,12 +7,14 @@
 
 Redis Connector Plugin for the Reekoh IoT Platform. Integrates a Reekoh instance to a Redis to synchronise device data.
 
-The PubNub Connector Plugin will push or publish data coming from your connected devices to your Redis Channel in real-time.
+The Redis Connector Plugin will push or publish data coming from your connected devices to your Redis Channel in real-time.
 
 ## Configuration Parameters
 
 The following configuration parameters are injected to the plugin from the platform.
 
-* publish_key - The Publish key value where users can subscribe.
-.
-
+* host - The Redis Host to connect to.
+* port - The port to connect to.
+* user - The username to use to authenticate.
+* pass - The password to use to authenticate.
+* publish_key - The publish key to use to publish data.
