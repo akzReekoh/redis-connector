@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "hiredis": "^0.4.1",
+    "lodash.isplainobject": "^3.2.0",
     "redis": "^2.4.2"
   },
   "devDependencies": {

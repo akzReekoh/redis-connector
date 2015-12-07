@@ -1,7 +1,3 @@
-/*
- * Just a sample code to test the connector plugin.
- * Kindly write your own unit tests for your own plugin.
- */
 'use strict';
 
 var cp     = require('child_process'),
@@ -49,61 +45,23 @@ describe('Connector', function () {
 		});
 	});
 
-	//describe('#data', function (done) {
-	//	it('should process the data', function () {
-	//		this.timeout(6000);
-	//		var redis  = require('redis'),
-	//			url = 'redis://' + options.user  + ':' + options.pass + '@' + options.host +':' + options.port + '/',
-	//			client = redis.createClient(url);
-    //
-    //
-	//		client.on('ready', function(){
-	//			client.subscribe(options.publish_key);
-	//		});
-    //
-    //
-    //
-	//		client.on('subscribe', function(channel, count) {
-	//			console.log(channel);
-	//			console.log(count);
-	//			done();
-	//		});
-    //
-	//		setTimeout( function() {
-    //
-	//			connector.send({
-	//				type: 'data',
-	//				data: {
-	//					key1: 'value1',
-	//					key2: 121,
-	//					key3: 40
-	//				}
-	//			}, function(err){
-    //
-	//			});
-	//		}, 4000);
-    //
-	//	});
-	//});
-
-	describe('#data', function (done) {
-		it('should process the data', function () {
+	describe('#data', function () {
+		it('should process the data', function (done) {
 			this.timeout(6000);
 			var redis  = require('redis'),
-				url = 'redis://' + options.user  + ':' + options.pass + '@' + options.host +':' + options.port + '/',
+				url    = 'redis://' + options.user + ':' + options.pass + '@' + options.host + ':' + options.port,
 				client = redis.createClient(url);
 
-			client.on('message', function(channel, message) {
-				console.log('help');
+			client.on('message', function (channel, message) {
+				message = JSON.parse(message);
+
 				assert.equal(message.key1, 'value1');
 				assert.equal(message.key2, 121);
 				assert.equal(message.key3, 40);
 				done();
 			});
 
-			client.on('subscribe', function(channel, count) {
-				console.log(channel);
-				console.log(count);
+			client.on('subscribe', function () {
 				connector.send({
 					type: 'data',
 					data: {
@@ -111,7 +69,7 @@ describe('Connector', function () {
 						key2: 121,
 						key3: 40
 					}
-				}, function(err){
+				}, function (err) {
 					assert.ifError(err);
 				});
 			});
@@ -119,5 +77,4 @@ describe('Connector', function () {
 			client.subscribe(options.publish_key);
 		});
 	});
-
 });

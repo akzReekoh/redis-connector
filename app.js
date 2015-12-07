@@ -1,7 +1,7 @@
 'use strict';
 
-var platform = require('./platform'),
-	redis    = require('redis'),
+var platform      = require('./platform'),
+	isPlainObject = require('lodash.isplainobject'),
 	client, publish_key;
 
 /**
@@ -10,19 +10,21 @@ var platform = require('./platform'),
  * @param {object} data The data coming from the device represented as JSON Object.
  */
 platform.on('data', function (data) {
-	// TODO: Send data outbound to the other platform, service or app here.
-
-	client.publish(publish_key, data, function(err){
-		if (!err) {
-			platform.log(JSON.stringify({
-				title: 'Data successfully published in Redis Connector.',
-				data: data
-			}));
-		} else {
-			console.error('Failed to publish data in Redis Connector.', err);
-			platform.handleException(err);
-		}
-	});
+	if (isPlainObject(data)) {
+		client.publish(publish_key, JSON.stringify(data), function (err) {
+			if (!err) {
+				platform.log(JSON.stringify({
+					title: 'Data successfully published in Redis.',
+					data: data
+				}));
+			} else {
+				console.error('Failed to publish data in Redis.', err);
+				platform.handleException(err);
+			}
+		});
+	}
+	else
+		platform.handleException(new Error('Invalid data received. Must be a valid JSON Object. Data:' + data));
 });
 
 /**
@@ -33,18 +35,17 @@ platform.once('close', function () {
 	var domain = require('domain');
 	var d = domain.create();
 
-	d.once('error', function(error) {
+	d.once('error', function (error) {
 		console.error(error);
 		platform.handleException(error);
 		platform.notifyClose();
 		d.exit();
 	});
 
-	d.run(function() {
-		// TODO: Release all resources and close connections etc.
+	d.run(function () {
 		if (client) client.end();
 
-		platform.notifyClose(); // Notify the platform that resources have been released.
+		platform.notifyClose();
 		d.exit();
 	});
 });
@@ -55,23 +56,20 @@ platform.once('close', function () {
  * @param {object} options The options or configuration injected by the platform to the plugin.
  */
 platform.once('ready', function (options) {
+	var redis = require('redis'),
+		url   = 'redis://' + options.user + ':' + options.pass + '@' + options.host + ':' + options.port;
 
-	var url = 'redis://' + options.user  + ':' + options.pass + '@' + options.host +':' + options.port + '/';
 	publish_key = options.publish_key;
 
 	client = redis.createClient(url);
 
-	client.on('ready', function() {
-		platform.log('Redis Connector Plugin ready.');
+	client.on('error', function (err) {
+		console.error('Error initializing Redis Plugin Connector connection.', err);
+		platform.handleException(err);
+	});
+
+	client.on('ready', function () {
+		platform.log('Redis Connector Plugin initialized.');
 		platform.notifyReady();
 	});
-
-	client.on('error', function(err) {
-		console.error('Error initializing Redis Plugin Connector connection.', err);
-		return platform.handleException(err);
-	});
-
-	// TODO: Initialize the connection to the other platform, service or app here.
-
-
 });
