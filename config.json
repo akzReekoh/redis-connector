@@ -19,7 +19,7 @@
   },
   "pass": {
 	"label": "Pass",
-	"type": "String",
+	"type": "Password",
 	"required": true,
 	"help": "Redis password for user."
   },
