@@ -1,7 +1,7 @@
 {
   "name": "redis-connector",
   "description": "Redis Connector Plugin for the Reekoh IoT Platform. Integrates a Reekoh instance to a Redis to synchronise device data.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Reekoh, Inc.",
   "main": "app.js",
   "scripts": {
