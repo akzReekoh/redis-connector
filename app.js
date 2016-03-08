@@ -2,35 +2,37 @@
 
 var platform      = require('./platform'),
 	isPlainObject = require('lodash.isplainobject'),
+	isArray = require('lodash.isarray'),
+	async = require('async'),
 	client, publish_key;
 
-/**
- * Emitted when device data is received.
- * This is the event to listen to in order to get real-time data feed from the connected devices.
- * @param {object} data The data coming from the device represented as JSON Object.
- */
+let sendData = (data) => {
+	client.publish(publish_key, JSON.stringify(data), function (err) {
+		if (!err) {
+			platform.log(JSON.stringify({
+				title: 'Data successfully published in Redis.',
+				data: data
+			}));
+		} else {
+			console.error('Failed to publish data in Redis.', err);
+			platform.handleException(err);
+		}
+	});
+};
+
 platform.on('data', function (data) {
 	if (isPlainObject(data)) {
-		client.publish(publish_key, JSON.stringify(data), function (err) {
-			if (!err) {
-				platform.log(JSON.stringify({
-					title: 'Data successfully published in Redis.',
-					data: data
-				}));
-			} else {
-				console.error('Failed to publish data in Redis.', err);
-				platform.handleException(err);
-			}
+		sendData(data);
+	}
+	else if(isArray(data)){
+		async.each(data, (datum) => {
+			sendData(datum);
 		});
 	}
 	else
-		platform.handleException(new Error('Invalid data received. Must be a valid JSON Object. Data:' + data));
+		platform.handleException(new Error('Invalid data received. Must be a valid Array/JSON Object. Data:' + data));
 });
 
-/**
- * Emitted when the platform shuts down the plugin.
- * The Connector should perform cleanup of the resources on this event.
- */
 platform.once('close', function () {
 	var domain = require('domain');
 	var d = domain.create();
@@ -50,11 +52,6 @@ platform.once('close', function () {
 	});
 });
 
-/**
- * Emitted when the platform bootstraps the plugin. The plugin should listen once and execute its init process.
- * Afterwards, platform.notifyReady() should be called to notify the platform that the init process is done.
- * @param {object} options The options or configuration injected by the platform to the plugin.
- */
 platform.once('ready', function (options) {
 	var redis = require('redis'),
 		url   = 'redis://' + options.user + ':' + options.pass + '@' + options.host + ':' + options.port;
