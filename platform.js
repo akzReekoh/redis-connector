@@ -36,42 +36,42 @@ require('util').inherits(Platform, require('events').EventEmitter);
  * Init function for Platform.
  */
 Platform.init = function () {
-    process.on('SIGINT', () => {
-        this.emit('close');
+    ['SIGHUP', 'SIGINT', 'SIGTERM'].forEach((signal) => {
+        process.on(signal, () => {
+        console.log(`Executing ${signal} listener...`);
+    this.emit('close');
 
     setTimeout(() => {
         this.removeAllListeners();
     process.exit();
 }, 2000);
 });
-
-process.on('SIGTERM', () => {
-    this.emit('close');
-
-setTimeout(() => {
-    this.removeAllListeners();
-process.exit();
-}, 2000);
 });
 
-process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception', error);
-this.handleException(error);
-this.emit('close');
+    ['unhandledRejection', 'uncaughtException'].forEach((exceptionEvent) => {
+        process.on(exceptionEvent, (error) => {
+        console.error(exceptionEvent, error);
+    this.handleException(error);
+    this.emit('close');
 
-setTimeout(() => {
-    this.removeAllListeners();
-process.exit(1);
+    setTimeout(() => {
+        this.removeAllListeners();
+    process.exit(1);
 }, 2000);
 });
+});
 
-process.on('message', (m) => {
-    if (m.type === 'ready')
-    this.emit('ready', m.data.options);
-else if (m.type === 'data')
-    this.emit('data', m.data);
-else if (m.type === 'close')
-    this.emit('close');
+    process.on('message', (m) => {
+        if (m.type === 'ready')
+    this.emit('ready', m.data.options, m.data.devices);
+    else if (m.type === 'data')
+        this.emit('data', m.data);
+    else if (m.type === 'adddevice')
+        this.emit('adddevice', m.data);
+    else if (m.type === 'removedevice')
+        this.emit('removedevice', m.data);
+    else if (m.type === 'close')
+        this.emit('close');
 });
 };
 
@@ -85,8 +85,8 @@ Platform.prototype.notifyReady = function (callback) {
 
     setImmediate(() => {
         process.send({
-            type: 'ready'
-        }, callback);
+        type: 'ready'
+    }, callback);
 });
 };
 
@@ -100,8 +100,8 @@ Platform.prototype.notifyClose = function (callback) {
 
     setImmediate(() => {
         process.send({
-            type: 'close'
-        }, callback);
+        type: 'close'
+    }, callback);
 });
 };
 
