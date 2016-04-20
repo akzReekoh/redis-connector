@@ -20,17 +20,23 @@ let sendData = (data, callback) => {
 };
 
 platform.on('data', function (data) {
-	if (isPlainObject(data)) {
+	if(isPlainObject(data)){
 		sendData(data, (error) => {
-            platform.handleException(error);
+			if(error) {
+				console.error(error);
+				platform.handleException(error);
+			}
 		});
 	}
 	else if(isArray(data)){
 		async.each(data, (datum, done) => {
 			sendData(datum, done);
 		}, (error) => {
-            platform.handleException(error);
-        });
+			if(error) {
+				console.error(error);
+				platform.handleException(error);
+			}
+		});
 	}
 	else
 		platform.handleException(new Error('Invalid data received. Must be a valid Array/JSON Object. Data:' + data));
