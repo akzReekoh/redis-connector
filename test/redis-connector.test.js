@@ -5,10 +5,10 @@ var cp     = require('child_process'),
 	connector;
 
 var options = {
-	user: 'rbanquerigo',
-	pass: 'rozzwalla',
-	host: 'pub-redis-16219.us-east-1-2.1.ec2.garantiadata.com',
-	port: 16219,
+	user: 'redisplugin',
+	pass: 'HelloWorld2016',
+	host: 'pub-redis-15275.us-east-1-4.2.ec2.garantiadata.com',
+	port: 15275,
 	publish_key: 'test_channel'
 };
 
