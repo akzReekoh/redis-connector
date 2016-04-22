@@ -6,27 +6,36 @@ var platform      = require('./platform'),
 	async = require('async'),
 	client, publish_key;
 
-let sendData = (data) => {
+let sendData = (data, callback) => {
 	client.publish(publish_key, JSON.stringify(data), function (err) {
 		if (!err) {
 			platform.log(JSON.stringify({
 				title: 'Data successfully published in Redis.',
 				data: data
 			}));
-		} else {
-			console.error('Failed to publish data in Redis.', err);
-			platform.handleException(err);
 		}
+
+        callback(err);
 	});
 };
 
 platform.on('data', function (data) {
-	if (isPlainObject(data)) {
-		sendData(data);
+	if(isPlainObject(data)){
+		sendData(data, (error) => {
+			if(error) {
+				console.error(error);
+				platform.handleException(error);
+			}
+		});
 	}
 	else if(isArray(data)){
-		async.each(data, (datum) => {
-			sendData(datum);
+		async.each(data, (datum, done) => {
+			sendData(datum, done);
+		}, (error) => {
+			if(error) {
+				console.error(error);
+				platform.handleException(error);
+			}
 		});
 	}
 	else
