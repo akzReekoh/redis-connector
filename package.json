@@ -1,11 +1,11 @@
 {
   "name": "redis-connector",
   "description": "Redis Connector Plugin for the Reekoh IoT Platform. Integrates a Reekoh instance to a Redis to synchronise device data.",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "author": "Reekoh, Inc.",
   "main": "app.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp lint"
   },
   "repository": {
     "type": "git",
@@ -18,7 +18,8 @@
     "jshint": "^2.9.1",
     "lodash.isarray": "^4.0.0",
     "lodash.isplainobject": "^4.0.4",
-    "redis": "^2.6.0-1"
+    "redis": "^2.6.0-1",
+    "reekoh": "^1.0.2"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
@@ -27,6 +28,7 @@
     "gulp-json-lint": "^0.1.0",
     "gulp-mocha": "^2.2.0",
     "gulp-plumber": "^1.1.0",
+    "gulp-standard": "^8.0.4",
     "mocha": "^2.4.5"
   },
   "license": "LGPL-3.0"

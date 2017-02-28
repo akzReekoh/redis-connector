@@ -1,81 +1,70 @@
-'use strict';
+'use strict'
 
-var platform      = require('./platform'),
-	isPlainObject = require('lodash.isplainobject'),
-	isArray = require('lodash.isarray'),
-	async = require('async'),
-	client, publish_key;
+let reekoh = require('reekoh')
+let _plugin = new reekoh.plugins.Connector()
+let async = require('async')
+let isArray = require('lodash.isarray')
+let isPlainObject = require('lodash.isplainobject')
+let client = null
 
 let sendData = (data, callback) => {
-	client.publish(publish_key, JSON.stringify(data), function (err) {
-		if (!err) {
-			platform.log(JSON.stringify({
-				title: 'Data successfully published in Redis.',
-				data: data
-			}));
-		}
+  client.publish(_plugin.config.publishKey, JSON.stringify(data), (err) => {
+    if (!err) {
+      _plugin.log(JSON.stringify({
+        title: 'Data successfully published in Redis.',
+        data: data
+      }))
+    }
 
-        callback(err);
-	});
-};
+    callback(err)
+  })
+}
 
-platform.on('data', function (data) {
-	if(isPlainObject(data)){
-		sendData(data, (error) => {
-			if(error) {
-				console.error(error);
-				platform.handleException(error);
-			}
-		});
-	}
-	else if(isArray(data)){
-		async.each(data, (datum, done) => {
-			sendData(datum, done);
-		}, (error) => {
-			if(error) {
-				console.error(error);
-				platform.handleException(error);
-			}
-		});
-	}
-	else
-		platform.handleException(new Error('Invalid data received. Must be a valid Array/JSON Object. Data:' + data));
-});
+/**
+ * Emitted when device data is received.
+ * This is the event to listen to in order to get real-time data feed from the connected devices.
+ * @param {object} data The data coming from the device represented as JSON Object.
+ */
+_plugin.on('data', (data) => {
+  if (isPlainObject(data)) {
+    sendData(data, (error) => {
+      if (error) {
+        console.error(error)
+        _plugin.logException(error)
+      }
+    })
+  } else if (isArray(data)) {
+    async.each(data, (datum, done) => {
+      sendData(datum, done)
+    }, (error) => {
+      if (error) {
+        console.error(error)
+        _plugin.logException(error)
+      }
+    })
+  } else {
+    _plugin.logException(new Error('Invalid data received. Must be a valid Array/JSON Object. Data:' + data))
+  }
+})
 
-platform.once('close', function () {
-	var domain = require('domain');
-	var d = domain.create();
+/**
+ * Emitted when the platform bootstraps the plugin. The plugin should listen once and execute its init process.
+ */
+_plugin.once('ready', () => {
+  let redis = require('redis')
+  let url = 'redis://' + _plugin.config.user + ':' + _plugin.config.pass + '@' + _plugin.config.host + ':' + _plugin.config.port
 
-	d.once('error', function (error) {
-		console.error(error);
-		platform.handleException(error);
-		platform.notifyClose();
-		d.exit();
-	});
+  client = redis.createClient(url)
 
-	d.run(function () {
-		if (client) client.end();
+  client.on('error', (err) => {
+    console.error('Error initializing Redis Plugin Connector connection.', err)
+    _plugin.logException(err)
+  })
 
-		platform.notifyClose();
-		d.exit();
-	});
-});
+  client.on('ready', () => {
+    _plugin.log('Redis Connector Plugin initialized.')
+    _plugin.emit('init')
+  })
+})
 
-platform.once('ready', function (options) {
-	var redis = require('redis'),
-		url   = 'redis://' + options.user + ':' + options.pass + '@' + options.host + ':' + options.port;
-
-	publish_key = options.publish_key;
-
-	client = redis.createClient(url);
-
-	client.on('error', function (err) {
-		console.error('Error initializing Redis Plugin Connector connection.', err);
-		platform.handleException(err);
-	});
-
-	client.on('ready', function () {
-		platform.log('Redis Connector Plugin initialized.');
-		platform.notifyReady();
-	});
-});
+module.exports = _plugin

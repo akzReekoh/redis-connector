@@ -3,7 +3,8 @@
 	"label": "Host",
 	"type": "String",
 	"required": true,
-	"help": "Redis host server."
+	"help": "Redis host server.",
+    "maxLength": 50
   },
   "port": {
 	"label": "Port",
@@ -15,7 +16,8 @@
 	"label": "User",
 	"type": "String",
 	"required": true,
-	"help": "Redis user account."
+	"help": "Redis user account.",
+    "maxLength": 50
   },
   "pass": {
 	"label": "Pass",
@@ -23,10 +25,11 @@
 	"required": true,
 	"help": "Redis password for user."
   },
-  "publish_key": {
+  "publishKey": {
 	"label": "Channel",
 	"type": "String",
 	"required": true,
-	"help": "The channel where data will be published."
+	"help": "The channel where data will be published.",
+    "maxLength": 50
   }
 }

@@ -1,80 +1,64 @@
-'use strict';
+'use strict'
 
-var cp     = require('child_process'),
-	assert = require('assert'),
-	connector;
+const amqp = require('amqplib')
 
-var options = {
+let _channel = null
+let _conn = null
+let app = null
+
+let options = {
 	user: 'redisplugin',
 	pass: 'HelloWorld2016',
-	host: 'pub-redis-15275.us-east-1-4.2.ec2.garantiadata.com',
-	port: 15275,
-	publish_key: 'test_channel'
+	host: 'localhost',
+	port: 6379,
+	publishKey: 'test_channel'
 };
 
-describe('Connector', function () {
-	this.slow(5000);
+describe('Redis Connector Test', () => {
+  before('init', () => {
+    process.env.ACCOUNT = 'adinglasan'
+    process.env.CONFIG = JSON.stringify(options)
+    process.env.INPUT_PIPE = 'ip.redis'
+    process.env.LOGGERS = 'logger1, logger2'
+    process.env.EXCEPTION_LOGGERS = 'ex.logger1, ex.logger2'
+    process.env.BROKER = 'amqp://guest:guest@127.0.0.1/'
 
-	after('terminate child process', function () {
-		connector.kill('SIGKILL');
-	});
+    amqp.connect(process.env.BROKER)
+      .then((conn) => {
+        _conn = conn
+        return conn.createChannel()
+      }).then((channel) => {
+      _channel = channel
+    }).catch((err) => {
+      console.log(err)
+    })
+  })
 
-	describe('#spawn', function () {
-		it('should spawn a child process', function () {
-			assert.ok(connector = cp.fork(process.cwd()), 'Child process not spawned.');
-		});
-	});
+  after('close connection', function (done) {
+    _conn.close()
+    done()
+  })
 
-	describe('#handShake', function () {
-		it('should notify the parent process when ready within 5 seconds', function (done) {
-			this.timeout(5000);
+  describe('#start', function () {
+    it('should start the app', function (done) {
+      this.timeout(10000)
+      app = require('../app')
+      app.once('init', done)
+    })
+  })
 
-			connector.on('message', function (message) {
-				if (message.type === 'ready')
-					done();
-			});
+  describe('#data', () => {
+    it('should send data to third party client', function (done) {
+      this.timeout(15000)
 
-			connector.send({
-				type: 'ready',
-				data: {
-					options: options
-				}
-			}, function (error) {
-				assert.ifError(error);
-			});
-		});
-	});
+      let data = {
+        key1: 'value1',
+        key2: 121,
+        key3: 40
+      }
 
-	describe('#data', function () {
-		it('should process the data', function (done) {
-			this.timeout(6000);
-			var redis  = require('redis'),
-				url    = 'redis://' + options.user + ':' + options.pass + '@' + options.host + ':' + options.port,
-				client = redis.createClient(url);
-
-			client.on('message', function (channel, message) {
-				message = JSON.parse(message);
-
-				assert.equal(message.key1, 'value1');
-				assert.equal(message.key2, 121);
-				assert.equal(message.key3, 40);
-				done();
-			});
-
-			client.on('subscribe', function () {
-				connector.send({
-					type: 'data',
-					data: {
-						key1: 'value1',
-						key2: 121,
-						key3: 40
-					}
-				}, function (err) {
-					assert.ifError(err);
-				});
-			});
-
-			client.subscribe(options.publish_key);
-		});
-	});
-});
+      _channel.sendToQueue('ip.redis', new Buffer(JSON.stringify(data)))
+      setTimeout(done, 10000)
+    })
+  })
+})
