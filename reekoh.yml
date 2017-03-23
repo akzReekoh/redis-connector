@@ -1,0 +1,48 @@
+---
+version: 1.0.0 # So we could parse new versions of the manifest without dropping support for older ones. The CLI should be able to parse the YAML file based on the version
+kind: Plugin # We will add other objects that can be uploaded in the registry like: Add-ons, full-blown applications, bots and others TBD
+metadata:
+  name: redis-connector
+  description: Redis Connector Plugin for the Reekoh IoT Platform. Integrates a Reekoh instance to a Redis to synchronise device data.
+  documentation: ./README.md
+  icon: ./redis.png
+  signupLink:
+  type: Connector
+  price: 0
+  tags:
+    - redis
+  config:
+    host:
+      label: Host
+      type: String
+      required: true
+      help: Redis host server.
+      maxLength: 1000
+      format:
+        pattern: "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+    port:
+      label: Port
+      type: Number
+      required: true
+      help: Redis port of the host server.
+    user:
+      label: User
+      type: String
+      required: true
+      help: Redis user account.
+      maxLength: 1000
+    pass:
+      label: Pass
+      type: Password
+      required: true
+      help: Redis password for user.
+    publishKey:
+      label: Channel
+      type: String
+      required: true
+      help: The channel where data will be published.
+      maxLength: 1000
+  release:
+    version: 1.0.0
+    notes: path/to/RELEASENOTESv1.0.0.md
+    image: path/to/docker/image

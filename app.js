@@ -47,6 +47,22 @@ _plugin.on('data', (data) => {
   }
 })
 
+process.on('SIGINT', () => {
+  let domain = require('domain')
+  let d = domain.create()
+
+  d.once('error', (error) => {
+    console.error(error)
+    _plugin.logException(error)
+    d.exit()
+  })
+
+  d.run(function () {
+    if (client) client.end()
+    d.exit()
+  })
+})
+
 /**
  * Emitted when the platform bootstraps the plugin. The plugin should listen once and execute its init process.
  */

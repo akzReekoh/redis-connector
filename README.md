@@ -17,4 +17,4 @@ The following configuration parameters are injected to the plugin from the platf
 * port - The port to connect to.
 * user - The username to use to authenticate.
 * pass - The password to use to authenticate.
-* publish_key - The publish key to use to publish data.
+* publishKey - The publish key to use to publish data.
