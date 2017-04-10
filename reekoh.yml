@@ -11,38 +11,38 @@ metadata:
   price: 0
   tags:
     - redis
-  config:
-    host:
-      label: Host
-      type: String
-      required: true
-      help: Redis host server.
-      maxLength: 1000
-      format:
-        pattern: "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
-    port:
-      label: Port
-      type: Number
-      required: true
-      help: Redis port of the host server.
-    user:
-      label: User
-      type: String
-      required: true
-      help: Redis user account.
-      maxLength: 1000
-    pass:
-      label: Pass
-      type: Password
-      required: true
-      help: Redis password for user.
-    publishKey:
-      label: Channel
-      type: String
-      required: true
-      help: The channel where data will be published.
-      maxLength: 1000
   release:
     version: 1.0.0
     notes: path/to/RELEASENOTESv1.0.0.md
     image: path/to/docker/image
+    config:
+        host:
+          label: Host
+          type: String
+          required: true
+          help: Redis host server.
+          maxLength: 1000
+          format:
+            pattern: "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+        port:
+          label: Port
+          type: Number
+          required: true
+          help: Redis port of the host server.
+        user:
+          label: User
+          type: String
+          required: true
+          help: Redis user account.
+          maxLength: 1000
+        pass:
+          label: Pass
+          type: Password
+          required: true
+          help: Redis password for user.
+        publishKey:
+          label: Channel
+          type: String
+          required: true
+          help: The channel where data will be published.
+          maxLength: 1000
